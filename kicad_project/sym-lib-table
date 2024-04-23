@@ -1,5 +1,4 @@
 (sym_lib_table
   (version 7)
   (lib (name "kbd")(type "KiCad")(uri "/home/davide/repos/keyboards/kbd/kicad-symbols/kbd.kicad_sym")(options "")(descr ""))
-  (lib (name "B3S-1002")(type "KiCad")(uri "${KIPRJMOD}/B3S-1002.kicad_sym")(options "")(descr ""))
 )
