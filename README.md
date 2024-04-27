@@ -17,4 +17,4 @@ The code is based on the Arduino library because I'm lazy. For the same reason I
 
 For the used switches and controller lib/footprint, credit to [foostan/kdb](https://github.com/foostan/kbd/tree/main).
 
-Pictures to come.
+![Screenshot of the kicad 3D render](docs/screenshot.png "Screenshot of the kicad 3D viewer")
