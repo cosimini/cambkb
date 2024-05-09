@@ -18,22 +18,12 @@ const int n_cols = 7;
 int col_pins[n_cols] = { COL0, COL1, COL2, COL3, COL4, COL5, COL6 };
 int row_pins[n_rows] = { ROW0, ROW1, ROW2, ROW3 };
 // Status vector. It contains the status of each individial switch.
-// It has dimension 2 as I need to compare the status with the preious scan.
 bool status[2][n_rows][n_cols];
-// Initialize the matrix to false
-for(int i = 0; i < 2; i++) {
-  for(int j = 0; j < n_rows; j++) {
-    for(int k = 0; k < n_cols; k++) {
-      status[i][j][k] = false;
-    }
-  }
-}
 // The value toggle between 0 and 1 to select the status matrix
 int statusPointer = 0;
 // The side is either 0 (left) or 1 (right)
 int side = 0;
 // true if the controller acts as a master 
-// (i.e. actually sends the keystrokes to the PC)
 bool isMaster = false;
 
 // The routine scanning the switches matrix
@@ -56,6 +46,26 @@ void matrix_scan() {
   else statusPointer = 1;
 }
 
+/*
+* Master and slave are sitting in a different infinite loops
+*/
+void slaveLoop() {
+  while(true) {
+    if(Serial1.available()) {
+      Serial1.read();
+      matrix_scan();
+    }
+  }
+}
+
+void masterLoop() {
+  while(true) {
+    Serial1.write('1');
+    matrix_scan();
+    delay(20);
+  }
+}
+
 void setup() {
   // Set up pins
   for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
@@ -69,21 +79,20 @@ void setup() {
   }
   // Initialize the UART
   Serial1.begin(115200);
+  // Initialize the status matrix
+  for(int i = 0; i < 2; i++) {
+    for(int j = 0; j < n_rows; j++) {
+      for(int k = 0; k < n_cols; k++) {
+        status[i][j][k] = false;
+      }
+    }
+  }
+  // Execute the proper loop
+  if(isMaster) masterLoop();
+  else slaveLoop();
 }
 
+
 void loop() {
-  if(isMaster) {
-    // Tell slave to start scanning
-    Serial1.write('1');
-    matrix_scan();
-    if(Serial1.available()) {
-      // read data from UART
-    }
-    // All this should be inside a timer callback.
-    // For the time being I use a simple delay in the loop.
-    delay(20);
-  }
-  else{
-    if(Serial1.available()) { }
-  }
+  // Each side has its own execution loop.
 }
