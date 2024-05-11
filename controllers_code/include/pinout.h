@@ -2,17 +2,17 @@
 * Define pinout
 */
 
-#define ROW0 16
-#define ROW1 15
-#define ROW2 14
-#define ROW3 13
+#define ROW0 15
+#define ROW1 14
+#define ROW2 16
+#define ROW3 10
 
-#define COL0 12
-#define COL1 6
-#define COL2 7
-#define COL3 8
-#define COL4 9
-#define COL5 10
-#define COL6 11
+#define COL0 9
+#define COL1 3
+#define COL2 4
+#define COL3 5
+#define COL4 6
+#define COL5 7
+#define COL6 8
 
 #define EN_PIN 2
