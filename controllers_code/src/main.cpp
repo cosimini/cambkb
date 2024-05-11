@@ -63,6 +63,7 @@ void masterLoop() {
     Serial1.write('1');
     matrix_scan();
     delay(20);
+  }
 }
 
 void setup() {
@@ -87,11 +88,23 @@ void setup() {
     }
   }
   // Execute the proper loop
-  if(isMaster) masterLoop();
-  else slaveLoop();
+  //if(isMaster) masterLoop();
+  //else slaveLoop();
+  Serial.begin(9600);
 }
 
 
 void loop() {
-  // Each side has its own execution loop.
+  matrix_scan();
+  for(int r = 0; r < n_rows; r++) {
+    for(int c = 0; c < n_cols; c++) {
+      int p = 0;
+      if(statusPointer == 0) p = 1;
+      if(status[p][r][c]) Serial.print('_');
+      else Serial.print('*');
+    }
+    Serial.println();
+  }
+  Serial.println();
+  delay(500);
 }
