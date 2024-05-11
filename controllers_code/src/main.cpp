@@ -5,6 +5,7 @@
 
 // Define which side of the keyboard acts as USB device.
 // Side 1 is right, 0 is left
+#define DEBUG_MODE 1
 #define MASTER_SIDE 1
 
 #include "Arduino.h"
@@ -88,9 +89,12 @@ void setup() {
     }
   }
   // Execute the proper loop
-  //if(isMaster) masterLoop();
-  //else slaveLoop();
+#if DEBUG_MODE == 0
+  if(isMaster) masterLoop();
+  else slaveLoop();
+#else
   Serial.begin(9600);
+#endif
 }
 
 
@@ -98,13 +102,19 @@ void loop() {
   matrix_scan();
   for(int r = 0; r < n_rows; r++) {
     for(int c = 0; c < n_cols; c++) {
-      int p = 0;
-      if(statusPointer == 0) p = 1;
-      if(status[p][r][c]) Serial.print('_');
-      else Serial.print('*');
+      if(status[0][r][c] != status[1][r][c]) {
+        if(status[statusPointer][r][c] == true) Serial.print("*+* (");
+        else Serial.print("_-_ (");
+        Serial.print(r, DEC);
+        Serial.print(", ");
+        Serial.print(c, DEC);
+        Serial.print(") -> pins : ");
+        Serial.print(row_pins[r], DEC);
+        Serial.print(' ');
+        Serial.print(col_pins[c], DEC);
+        Serial.println();
+      }
     }
-    Serial.println();
   }
-  Serial.println();
-  delay(500);
+  delay(50);
 }
