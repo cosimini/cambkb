@@ -32,11 +32,11 @@ void matrix_scan() {
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], HIGH);
   // Select the row 'k' by setting to LOW the relative line
   for(int k = 0; k < n_rows; k++) {
+    // Enable the row
     digitalWrite(row_pins[k], LOW);
     // Scan the column
-    for(int i = 0; i < n_cols; i++) {
-      status[statusPointer][k][i] = digitalRead(col_pins[i]);
-    }
+    for(int i = 0; i < n_cols; i++) status[statusPointer][k][i] = digitalRead(col_pins[i]);
+    // Turn off the row
     digitalWrite(row_pins[k], HIGH);
   }
   // Disable the outputs.
@@ -63,14 +63,13 @@ void masterLoop() {
     Serial1.write('1');
     matrix_scan();
     delay(20);
-  }
 }
 
 void setup() {
   // Set up pins
-  for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
-  for(int k = 0; k < n_rows; k++) pinMode(col_pins[k], INPUT_PULLUP);
   pinMode(EN_PIN, INPUT_PULLUP);
+  for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
+  for(int k = 0; k < n_cols; k++) pinMode(col_pins[k], INPUT_PULLUP);
   // The side is speicified by the EN jumper
   if(digitalRead(EN_PIN)) side = 1;
   if(side == MASTER_SIDE) {
