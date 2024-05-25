@@ -8,9 +8,9 @@
 #define DEBUG_MODE 1
 #define SIDE 1
 #define MASTER_SIDE 1
-#define START_CHAR s
-#define MOD_CHAR m
-#define KEYS_CHAR k
+#define START_CHAR s    // Char sent by master to trigger scan on slave
+#define MOD_CHAR m      // Char sent by both parties before sending the modifier sum value
+#define KEYS_CHAR k     // Char sent by slave before sending the Chars to be sent via USB
 
 #include "Arduino.h"
 #include "Keyboard.h"
@@ -23,10 +23,6 @@ int row_pins[n_rows] = { ROW0, ROW1, ROW2, ROW3 }; // Map between row number and
 
 bool status[2][n_rows][n_cols]; // Status vector. It contains the status of each individial switch.
 int statusPointer = 0; // The value toggle between 0 and 1 to select the status matrix
-// TODO: Replace those with the define
-char startChar = 's';
-char modChar = 'm';
-char keysChar = 'k';
 
 // The routine scanning the switches matrix
 void matrix_scan() {
@@ -46,7 +42,7 @@ void sendModifiers() {
   for(int k = 0; k < nModifiers; k++) {
     if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (int) k+1;
   }
-  Serial1.write(modChar);
+  Serial1.write(MOD_CHAR);
   Serial1.write(modValue);
 }
 
@@ -55,11 +51,11 @@ void slaveLoop() {
   while(true) {
     if(Serial1.available()) {
       char comChar = Serial1.read();
-      if(comChar == startChar) {
+      if(comChar == START_CHAR) {
           matrix_scan();
           sendModifiers();
       }
-      if(comChar == modChar) {
+      if(comChar == MOD_CHAR) {
         // Map keystrokes and send them to master
       }
     }
@@ -69,7 +65,7 @@ void slaveLoop() {
 
 void masterLoop() {
   while(true) {
-    Serial1.write(startChar); // I exploit the fact that bidirectional communication is available to sync the scan
+    Serial1.write(START_CHAR); // I exploit the fact that bidirectional communication is available to sync the scan
     matrix_scan();
     sendModifiers();
     delay(20);
