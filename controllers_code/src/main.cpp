@@ -5,24 +5,24 @@
 
 // Define which side of the keyboard acts as USB device.
 // Side 1 is right, 0 is left
-#define DEBUG_MODE 1
-#define SIDE 1
-#define MASTER_SIDE 1
-#define START_CHAR s    // Char sent by master to trigger scan on slave
-#define MOD_CHAR m      // Char sent by both parties before sending the modifier sum value
-#define KEYS_CHAR k     // Char sent by slave before sending the Chars to be sent via USB
+#define DEBUG_MODE 1    // If enabled, send over serial information about keystrokes
+#define START_CHAR 's'  // Char sent by master to trigger scan on slave
+#define MOD_CHAR 'm'    // Char sent by both parties before sending the modifier sum value
+#define KEYS_CHAR 'k'   // Char sent by slave before sending the Chars to be sent via USB
 
 #include "Arduino.h"
 #include "Keyboard.h"
 #include "pinout.h"   // Microcontroller pinout
 #include "keymaps.h"  // Map between keys and sent codes
 
-// TODO: Rname those vectors and move the definition somewhere else
+// TODO: Rename those vectors and move the definition somewhere else
 int col_pins[n_cols] = { COL0, COL1, COL2, COL3, COL4, COL5, COL6 }; // Map between column number an pin number
 int row_pins[n_rows] = { ROW0, ROW1, ROW2, ROW3 }; // Map between row number and pin number
 
 bool status[2][n_rows][n_cols]; // Status vector. It contains the status of each individial switch.
 int statusPointer = 0; // The value toggle between 0 and 1 to select the status matrix
+int mod_state = 0;  // Sum of the modifiers value
+int local_mod;      // Value of the sum of modifiers at a specific time
 
 // The routine scanning the switches matrix
 void matrix_scan() {
@@ -36,14 +36,13 @@ void matrix_scan() {
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], LOW); // Disable the outputs.
 }
 
-void sendModifiers() {
+int sendModifiers() {
   // Send the modifier value (0, 1, ..., nModifiers)
   char modValue = 0;
-  for(int k = 0; k < nModifiers; k++) {
-    if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (int) k+1;
-  }
+  for(int k = 0; k < nModifiers; k++) if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (int) k+1;
   Serial1.write(MOD_CHAR);
   Serial1.write(modValue);
+  return modValue;
 }
 
 // Master and slave are sitting in a different infinite loops
@@ -53,22 +52,38 @@ void slaveLoop() {
       char comChar = Serial1.read();
       if(comChar == START_CHAR) {
           matrix_scan();
-          sendModifiers();
+          local_mod = sendModifiers();
       }
       if(comChar == MOD_CHAR) {
-        // Map keystrokes and send them to master
+        int temp_mod = (int) Serial.read() + local_mod;
+        if(temp_mod != mod_state) {} // TODO: Release all keys. }
+        else {} // TODO: Send keystrokes }
       }
     }
   }
 }
 
-
 void masterLoop() {
   while(true) {
     Serial1.write(START_CHAR); // I exploit the fact that bidirectional communication is available to sync the scan
     matrix_scan();
-    sendModifiers();
-    delay(20);
+    local_mod = sendModifiers();
+    if(Serial1.available() && Serial1.read() == MOD_CHAR) {
+      int temp_mod = (int) Serial.read() + local_mod;
+      if(temp_mod < mod_state) {
+        Keyboard.releaseAll();
+        mod_state = temp_mod;
+      }
+    }
+    for(int k = 0; k < n_rows; k++) {
+      for(int i = 0; i < n_cols; i++) {
+        if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && Map[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
+          if(status[statusPointer][k][i]) Keyboard.press(Map[mod_state][k][i]);
+          else Keyboard.release(Map[mod_state][k][i]);
+        }
+      }
+    }
+    delay(50);
   }
 }
 
@@ -77,7 +92,7 @@ void setup() {
   pinMode(EN_PIN, INPUT_PULLUP);
   for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
   for(int k = 0; k < n_cols; k++) pinMode(col_pins[k], INPUT_PULLUP);
-  Serial1.begin(115200); // Initialize the UART
+  Serial1.begin(9600); // Initialize the UART
   // Initialize the status matrix
   for(int i = 0; i < 2; i++) {
     for(int j = 0; j < n_rows; j++) {
@@ -89,12 +104,10 @@ void setup() {
   // Execute the proper loop
 #if DEBUG_MODE == 0
   if(digitalRead(EN_PIN)) {
-    if(SIDE == MASTER_SIDE) {
-      masterLoop();
-      Keyboard.begin();
-    }
-    else slaveLoop();
+    Keyboard.begin();
+    masterLoop();
   }
+  else slaveLoop();
 #else
   Serial.begin(9600);
 #endif
@@ -106,6 +119,8 @@ void loop() {
   for(int r = 0; r < n_rows; r++) {
     for(int c = 0; c < n_cols; c++) {
       if(status[0][r][c] != status[1][r][c]) {
+        // Send to usb
+        Serial.print("M: ");
         if(status[statusPointer][r][c] == true) Serial.print("*+* (");
         else Serial.print("_-_ (");
         Serial.print(r, DEC);
@@ -116,8 +131,22 @@ void loop() {
         Serial.print(' ');
         Serial.print(col_pins[c], DEC);
         Serial.println();
+        // Sent to Serial1
+        Serial1.print("S: ");
+        if(status[statusPointer][r][c] == true) Serial1.print("*+* (");
+        else Serial1.print("_-_ (");
+        Serial1.print(r, DEC);
+        Serial1.print(", ");
+        Serial1.print(c, DEC);
+        Serial1.print(") -> pins : ");
+        Serial1.print(row_pins[r], DEC);
+        Serial1.print(' ');
+        Serial1.print(col_pins[c], DEC);
+        Serial1.println();
+        // Read from Serial1
       }
     }
   }
+  while(Serial1.available()) Serial.print((char) Serial1.read());
   delay(50);
 }
