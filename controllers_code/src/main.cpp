@@ -5,7 +5,7 @@
 
 // Define which side of the keyboard acts as USB device.
 // Side 1 is right, 0 is left
-#define DEBUG_MODE 1    // If enabled, send over serial information about keystrokes
+#define DEBUG_MODE 0    // If enabled, send over serial information about keystrokes
 #define START_CHAR 's'  // Char sent by master to trigger scan on slave
 #define MOD_CHAR 'm'    // Char sent by both parties before sending the modifier sum value
 #define KEYS_CHAR 'k'   // Char sent by slave before sending the Chars to be sent via USB
@@ -55,9 +55,16 @@ void slaveLoop() {
           local_mod = sendModifiers();
       }
       if(comChar == MOD_CHAR) {
-        int temp_mod = (int) Serial.read() + local_mod;
-        if(temp_mod != mod_state) {} // TODO: Release all keys. }
-        else {} // TODO: Send keystrokes }
+        mod_state = local_mod + (int) Serial1.read();
+        for(int k = 0; k < n_rows; k++) {
+          for(int i = 0; i < n_cols; i++) {
+            if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && keyMap[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
+              if(status[statusPointer][k][i]) Serial1.write('p');
+              else Serial1.write('r');
+              Serial1.write((char) keyMap[mod_state][k][i]);
+            }
+          }
+        }
       }
     }
   }
@@ -77,10 +84,16 @@ void masterLoop() {
     }
     for(int k = 0; k < n_rows; k++) {
       for(int i = 0; i < n_cols; i++) {
-        if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && Map[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
-          if(status[statusPointer][k][i]) Keyboard.press(Map[mod_state][k][i]);
-          else Keyboard.release(Map[mod_state][k][i]);
+        if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && keyMap[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
+          if(status[statusPointer][k][i]) Keyboard.press(keyMap[mod_state][k][i]);
+          else Keyboard.release(keyMap[mod_state][k][i]);
         }
+      }
+    }
+    if(Serial1.available() && Serial1.read() == KEYS_CHAR) {
+      while(Serial1.available()) {
+        if(Serial1.read() == 'p') Keyboard.press((char) Serial1.read());
+        else Keyboard.release((char) Serial1.read());
       }
     }
     delay(50);
@@ -92,7 +105,7 @@ void setup() {
   pinMode(EN_PIN, INPUT_PULLUP);
   for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
   for(int k = 0; k < n_cols; k++) pinMode(col_pins[k], INPUT_PULLUP);
-  Serial1.begin(9600); // Initialize the UART
+  Serial1.begin(115200); // Initialize the UART
   // Initialize the status matrix
   for(int i = 0; i < 2; i++) {
     for(int j = 0; j < n_rows; j++) {
