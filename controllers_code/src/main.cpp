@@ -1,11 +1,13 @@
 /*
 * The code running in the two controllers.
 * The two communicate via UART.
+* As all the code I write it ended up being a pile of crap.
 */
 
 // Define which side of the keyboard acts as USB device.
-// Side 1 is right, 0 is left
+#define SIDE 1          // Compile for a specific side, 0 is left, 1 is right
 #define DEBUG_MODE 0    // If enabled, send over serial information about keystrokes
+// Those are the chars sent over the UART by the two controllers to communicate
 #define START_CHAR 's'  // Char sent by master to trigger scan on slave
 #define MOD_CHAR 'm'    // Char sent by both parties before sending the modifier sum value
 #define KEYS_CHAR 'k'   // Char sent by slave before sending the Chars to be sent via USB
@@ -26,11 +28,13 @@ int local_mod;      // Value of the sum of modifiers at a specific time
 
 // The routine scanning the switches matrix
 void matrix_scan() {
-  statusPointer = (statusPointer == 1) ? 0 : 1;  // Toggle the status pointer.
+  // statusPointer = (statusPointer == 1) ? 0 : 1;  // Toggle the status pointer.
+  if(statusPointer == 1) statusPointer = 0;
+  else statusPointer = 1;
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], HIGH); // Set all to HIGH as the electronics works with inverted logic
   for(int k = 0; k < n_rows; k++) {
     digitalWrite(row_pins[k], LOW); // Enable the row
-    for(int i = 0; i < n_cols; i++) status[statusPointer][k][i] = digitalRead(col_pins[i]); // Scan the column
+    for(int i = 0; i < n_cols; i++) status[statusPointer][k][i] = !digitalRead(col_pins[i]); // Scan the column
     digitalWrite(row_pins[k], HIGH); // Turn off the row
   }
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], LOW); // Disable the outputs.
@@ -39,10 +43,10 @@ void matrix_scan() {
 int sendModifiers() {
   // Send the modifier value (0, 1, ..., nModifiers)
   char modValue = 0;
-  for(int k = 0; k < nModifiers; k++) if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (int) k+1;
+  for(int k = 0; k < nModifiers; k++) if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (char) k+1;
   Serial1.write(MOD_CHAR);
   Serial1.write(modValue);
-  return modValue;
+  return (int) modValue;
 }
 
 // Master and slave are sitting in a different infinite loops
@@ -56,10 +60,12 @@ void slaveLoop() {
       }
       if(comChar == MOD_CHAR) {
         mod_state = local_mod + (int) Serial1.read();
+        if(mod_state > nModifiers) mod_state = nModifiers;
+        Serial1.write(KEYS_CHAR);
         for(int k = 0; k < n_rows; k++) {
           for(int i = 0; i < n_cols; i++) {
-            if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && keyMap[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
-              if(status[statusPointer][k][i]) Serial1.write('p');
+            if(status[0][k][i] != status[1][k][i] && keyMap[0][k][i] != (char) 0) {  // Fill position in the map to be considered modiriers with zeros
+              if(status[statusPointer][k][i] == true) Serial1.write('p');
               else Serial1.write('r');
               Serial1.write((char) keyMap[mod_state][k][i]);
             }
@@ -75,18 +81,17 @@ void masterLoop() {
     Serial1.write(START_CHAR); // I exploit the fact that bidirectional communication is available to sync the scan
     matrix_scan();
     local_mod = sendModifiers();
-    if(Serial1.available() && Serial1.read() == MOD_CHAR) {
-      int temp_mod = (int) Serial.read() + local_mod;
-      if(temp_mod < mod_state) {
-        Keyboard.releaseAll();
-        mod_state = temp_mod;
-      }
+    if(Serial1.available() && Serial1.read() == MOD_CHAR) { // TODO: Turn this into a "wait until available"
+      local_mod += (int) Serial.read();
     }
-    for(int k = 0; k < n_rows; k++) {
-      for(int i = 0; i < n_cols; i++) {
-        if(status[statusPointer][k][i] != status[(statusPointer == 1) ? 0:1][k][i] && keyMap[0][k][i] != 0) {  // Fill position in the map to be considered modiriers with zeros
-          if(status[statusPointer][k][i]) Keyboard.press(keyMap[mod_state][k][i]);
-          else Keyboard.release(keyMap[mod_state][k][i]);
+    if(local_mod > nModifiers) local_mod = nModifiers;
+    if(local_mod < mod_state) Keyboard.releaseAll();
+    mod_state = local_mod;
+    for(int r = 0; r < n_rows; r++) {
+      for(int c = 0; c < n_cols; c++) {
+        if(status[0][r][c] != status[1][r][c]) {
+          if(status[statusPointer][r][c]) Keyboard.press(keyMap[mod_state][r][c]);
+          else Keyboard.release(keyMap[mod_state][r][c]);
         }
       }
     }
@@ -96,7 +101,7 @@ void masterLoop() {
         else Keyboard.release((char) Serial1.read());
       }
     }
-    delay(50);
+    delay(20);  // TODO: Use an interrupt attached to a timer instead of this horrible patch
   }
 }
 
