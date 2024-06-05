@@ -25,6 +25,7 @@ bool status[2][n_rows][n_cols]; // Status vector. It contains the status of each
 int statusPointer = 0; // The value toggle between 0 and 1 to select the status matrix
 int mod_state = 0;  // Sum of the modifiers value
 int local_mod;      // Value of the sum of modifiers at a specific time
+bool isMaster;
 
 // The routine scanning the switches matrix
 void matrix_scan() {
@@ -81,7 +82,8 @@ void masterLoop() {
     Serial1.write(START_CHAR); // I exploit the fact that bidirectional communication is available to sync the scan
     matrix_scan();
     local_mod = sendModifiers();
-    if(Serial1.available() && Serial1.read() == MOD_CHAR) { // TODO: Turn this into a "wait until available"
+    delay(20);  // TODO: Use an interrupt attached to a timer instead of this horrible patch
+    if(Serial1.available() && (char) Serial1.read() == MOD_CHAR) { // TODO: Turn this into a "wait until available"
       local_mod += (int) Serial.read();
     }
     if(local_mod > nModifiers) local_mod = nModifiers;
@@ -95,13 +97,13 @@ void masterLoop() {
         }
       }
     }
-    if(Serial1.available() && Serial1.read() == KEYS_CHAR) {
+    if(Serial1.available() && (char) Serial1.read() == KEYS_CHAR) {
       while(Serial1.available()) {
-        if(Serial1.read() == 'p') Keyboard.press((char) Serial1.read());
-        else Keyboard.release((char) Serial1.read());
+        if((char) Serial1.read() == 'p') Keyboard.press((char) Serial1.read());
+        else if((char) Serial.read() == 'r') Keyboard.release((char) Serial1.read());
+        else {}
       }
     }
-    delay(20);  // TODO: Use an interrupt attached to a timer instead of this horrible patch
   }
 }
 
