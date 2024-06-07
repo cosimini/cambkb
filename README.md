@@ -1,5 +1,8 @@
 # Yet another split keyboard with low profile Gateron switches
 
+**Important note: tested, it works**
+Now the hard part, try getting used to it.
+
 Basically a replica of any other split keyboard project you can find on github
 * Pro micro controller
 * Gateron low profile KS-33 switches with hot-swap sockets
@@ -11,6 +14,8 @@ The distance between switches is 19mm and not 19.05mm like many other, I don't c
 
 The PCB is designed using KiCad. It is the same for both right and left side, depending on where components are soldered.
 There's no 3D printed case or key support mask, but I'd like to implement it.
+
+The reason for the double socket for the controller is that I was usure on which side I'd like to put the controller.
 
 For the time being I'm not planning to implement QMK or similar things, key map is hardcoded in the code.
 The code is based on the Arduino library because I'm lazy. For the same reason I'm using PlatformIO.
