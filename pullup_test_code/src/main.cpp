@@ -52,3 +52,44 @@ void loop() {
 	// digitalWrite(16, LOW);
 	delay(50);
 }
+
+void debugLoop() {
+  Serial.begin(9600);
+  while(true) {
+    matrix_scan();
+    for(int r = 0; r < n_rows; r++) {
+      for(int c = 0; c < n_cols; c++) {
+        if(status[0][r][c] != status[1][r][c]) {
+          // Send to usb
+          Serial.print("M: ");
+          if(status[statusPointer][r][c] == true) Serial.print("*+* (");
+          else Serial.print("_-_ (");
+          Serial.print(r, DEC);
+          Serial.print(", ");
+          Serial.print(c, DEC);
+          Serial.print(") -> pins : ");
+          Serial.print(row_pins[r], DEC);
+          Serial.print(' ');
+          Serial.print(col_pins[c], DEC);
+          Serial.println();
+          // Sent to Serial1
+          Serial1.print("S: ");
+          if(status[statusPointer][r][c] == true) Serial1.print("*+* (");
+          else Serial1.print("_-_ (");
+          Serial1.print(r, DEC);
+          Serial1.print(", ");
+          Serial1.print(c, DEC);
+          Serial1.print(") -> pins : ");
+          Serial1.print(row_pins[r], DEC);
+          Serial1.print(' ');
+          Serial1.print(col_pins[c], DEC);
+          Serial1.println();
+          // Read from Serial1
+        }
+      }
+    }
+    while(Serial1.available()) Serial.print((char) Serial1.read());
+    delay(50);
+  }
+}
+

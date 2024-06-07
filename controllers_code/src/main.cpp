@@ -4,39 +4,35 @@
 * As all the code I write it ended up being a pile of crap.
 */
 
-#define SIDE 0          // Select the keymap to save in the device memory
-#define DEBUG_MODE 0    // If enabled, send over serial information about keystrokes
-#define MOD_CHAR 'm'    // Char sent by both parties before sending the modifier sum value
+#define SIDE 0        // Select the keymap to save in the device memory
+#define MOD_CHAR 'm'  // Char sent by both parties before sending the modifier sum value
 
 #include "Arduino.h"
 #include "Keyboard.h"
 #include "pinout.h"   // Microcontroller pinout
 #include "keymaps.h"  // Map between keys and sent codes
 
-// TODO: Rename those vectors and move the definition somewhere else
-int col_pins[n_cols] = { COL0, COL1, COL2, COL3, COL4, COL5, COL6 }; // Map between column number an pin number
-int row_pins[n_rows] = { ROW0, ROW1, ROW2, ROW3 }; // Map between row number and pin number
-
+int col_pins[n_cols] = { COL0, COL1, COL2, COL3, COL4, COL5, COL6 };  // Map between columns number and pin
+int row_pins[n_rows] = { ROW0, ROW1, ROW2, ROW3 };                    // Map between rows number and pin
 bool status[2][n_rows][n_cols]; // Status vector. It contains the status of each individial switch.
-int statusPointer = 0; // The value toggle between 0 and 1 to select the status matrix
-int mod_state = 0;  // Sum of the modifiers value
-int local_mod;      // Value of the sum of modifiers at a specific time
-bool isMaster;      // Only one side is sending kewystrokes, the selection is done with a jumper
+int statusPointer = 0;          // The value toggle between 0 and 1 to select the status matrix
+int mod_state = 0;              // Sum of the modifiers value
+int local_mod;                  // Value of the sum of modifiers at a specific time
+bool isMaster;                  // Only one side is sending kewystrokes, the selection is done with a jumper
 
-// The routine scanning the switches matrix
+// Scan the switches matrix and update status[]
 void matrix_scan() {
   statusPointer = (statusPointer == 1) ? 0 : 1;  // Toggle the status pointer.
-  // if(statusPointer == 1) statusPointer = 0;
-  // else statusPointer = 1;
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], HIGH); // Set all to HIGH as the electronics works with inverted logic
   for(int k = 0; k < n_rows; k++) {
-    digitalWrite(row_pins[k], LOW); // Enable the row
+    digitalWrite(row_pins[k], LOW);
     for(int i = 0; i < n_cols; i++) status[statusPointer][k][i] = !digitalRead(col_pins[i]); // Scan the column
-    digitalWrite(row_pins[k], HIGH); // Turn off the row
+    digitalWrite(row_pins[k], HIGH);
   }
   for(int k = 0; k < n_rows; k++) digitalWrite(row_pins[k], LOW); // Disable the outputs.
 }
 
+// Check if modifiers are pressed
 int sendModifiers() {
   char modValue = 0;
   for(int k = 0; k < nModifiers; k++) if(status[statusPointer][modifiers[0][k]][modifiers[1][k]]) modValue += (char) k+1;
@@ -45,54 +41,12 @@ int sendModifiers() {
   return (int) modValue;
 }
 
-void debugLoop() {
-  Serial.begin(9600);
-  while(true) {
-    matrix_scan();
-    for(int r = 0; r < n_rows; r++) {
-      for(int c = 0; c < n_cols; c++) {
-        if(status[0][r][c] != status[1][r][c]) {
-          // Send to usb
-          Serial.print("M: ");
-          if(status[statusPointer][r][c] == true) Serial.print("*+* (");
-          else Serial.print("_-_ (");
-          Serial.print(r, DEC);
-          Serial.print(", ");
-          Serial.print(c, DEC);
-          Serial.print(") -> pins : ");
-          Serial.print(row_pins[r], DEC);
-          Serial.print(' ');
-          Serial.print(col_pins[c], DEC);
-          Serial.println();
-          // Sent to Serial1
-          Serial1.print("S: ");
-          if(status[statusPointer][r][c] == true) Serial1.print("*+* (");
-          else Serial1.print("_-_ (");
-          Serial1.print(r, DEC);
-          Serial1.print(", ");
-          Serial1.print(c, DEC);
-          Serial1.print(") -> pins : ");
-          Serial1.print(row_pins[r], DEC);
-          Serial1.print(' ');
-          Serial1.print(col_pins[c], DEC);
-          Serial1.println();
-          // Read from Serial1
-        }
-      }
-    }
-    while(Serial1.available()) Serial.print((char) Serial1.read());
-    delay(50);
-  }
-}
-
-
+// Arduino setup method
 void setup() {
-  // Set up pins
   pinMode(EN_PIN, INPUT_PULLUP);
   for(int k = 0; k < n_rows; k++) pinMode(row_pins[k], OUTPUT);
   for(int k = 0; k < n_cols; k++) pinMode(col_pins[k], INPUT_PULLUP);
-  Serial1.begin(115200); // Initialize the UART
-  // Initialize the status matrix
+  Serial1.begin(115200);
   for(int i = 0; i < 2; i++) {
     for(int j = 0; j < n_rows; j++) {
       for(int k = 0; k < n_cols; k++) {
@@ -100,13 +54,11 @@ void setup() {
       }
     }
   }
-#if DEBUG_MODE == 1
-  debugLoop();
-#endif
-  isMaster = digitalRead(EN_PIN);
+  isMaster = digitalRead(EN_PIN); // Master is selected with a jumper
   if(isMaster) Keyboard.begin();
 }
 
+// Main loop
 void loop() {
   if(isMaster) {
     delay(20);
