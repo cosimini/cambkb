@@ -4,7 +4,7 @@
 * As all the code I write it ended up being a pile of crap.
 */
 
-#define SIDE 0        // Select the keymap to save in the device memory
+#define SIDE 1        // Select the keymap to save in the device memory
 #define MOD_CHAR 'm'  // Char sent by both parties before sending the modifier sum value
 
 #include "Arduino.h"
@@ -72,7 +72,7 @@ void loop() {
     local_mod = sendModifiers();
   }
   if((char) Serial1.read() == MOD_CHAR) local_mod += (int) Serial1.read();
-  if(local_mod > nModifiers) local_mod = nModifiers;
+  if(local_mod > nLayers) local_mod = nLayers;
   if(isMaster && local_mod < mod_state) Keyboard.releaseAll();
   mod_state = local_mod;
   for(int r = 0; r < n_rows; r++) {

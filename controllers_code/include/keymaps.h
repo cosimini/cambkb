@@ -8,6 +8,7 @@
 // TODO: replace those with compiler definitions
 const int n_rows = 4;	  // Number of rows
 const int n_cols = 7;	  // Number of columns
+const int nLayers = 2; // number of modifiers
 
 // This is the only way I managed to use those macros
 // for some miserious reason, using them inside the map
@@ -31,9 +32,9 @@ char cPAGEDOWN = KEY_PAGE_DOWN;
 char cPAGEUP = KEY_UP_ARROW;
 
 #if SIDE == 1	// right side
-const int nModifiers = 2; // number of modifiers
+const int nModifiers = 2;
 int modifiers[2][nModifiers] = {{1, 2}, {0, 0}}; 	// Address of the modifiers
-char keyMap[nModifiers + 1][n_rows][n_cols] = {	// Keymap for each possible layer
+char keyMap[nLayers + 1][n_rows][n_cols] = {	// Keymap for each possible layer
 	{	// Layer 0
 		{'=',  cBS,    '0', '9', '8', '7', '6'},
 		{'\\', '/',    'p', 'o', 'i', 'u', 'y'},
@@ -55,10 +56,22 @@ char keyMap[nModifiers + 1][n_rows][n_cols] = {	// Keymap for each possible laye
 };
 
 #else	// left side
-const int nModifiers = 0; // number of modifiers
+const int nModifiers = 0;
 int modifiers[2][nModifiers]; 	// Address of the modifiers
-char keyMap[nModifiers + 1][n_rows][n_cols] = {	// Keymap for each possible layer
+char keyMap[nLayers + 1][n_rows][n_cols] = {	// Keymap for each possible layer
 	{	// Layer 0
+		{'`',  cESC,   '1', '2', '3', '4', '5'},
+		{' ',  cTAB,   'q', 'w', 'e', 'r', 't'},
+		{cALT, cSHIFT, 'a', 's', 'd', 'f', 'g'},
+		{cWIN, cCTRL,  'z', 'x', 'c', 'v', 'b'}
+	},
+	{	// Layer 1
+		{'`',  cESC,   '1', '2', '3', '4', '5'},
+		{' ',  cTAB,   'e', '7', '8', '9', 'e'},
+		{cALT, cSHIFT, '.', '4', '5', '6', '.'},
+		{cWIN, cCTRL,  '0', '1', '2', '3', '0'}
+	},
+	{	// Layer 2
 		{'`',  cESC,   '1', '2', '3', '4', '5'},
 		{' ',  cTAB,   'q', 'w', 'e', 'r', 't'},
 		{cALT, cSHIFT, 'a', 's', 'd', 'f', 'g'},
