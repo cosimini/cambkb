@@ -37,9 +37,9 @@ int modifiers[2][nModifiers] = {{1, 2}, {0, 0}}; 	// Address of the modifiers
 char keyMap[nLayers + 1][n_rows][n_cols] = {	// Keymap for each possible layer
 	{	// Layer 0
 		{'=',  cBS,    '0', '9', '8', '7', '6'},
-		{'\\', '/',    'p', 'o', 'i', 'u', 'y'},
+		{0,    '/',    'p', 'o', 'i', 'u', 'y'},
 		{0,    cENTER, ';', 'l', 'k', 'j', 'h'},
-		{0,    '\'',   '-', '.', ',', 'm', 'n'}
+		{'\\', '\'',   '-', '.', ',', 'm', 'n'}
 	},
 	{	// Layer 1
 		{'=', cDEL,   '0',  '9',    '8',     '7',       '6'},
