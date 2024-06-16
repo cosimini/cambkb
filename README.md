@@ -3,6 +3,8 @@
 **Important note: tested, it works**
 Now the hard part, try getting used to it.
 
+**WARNING:** There's a mistake in the RJ-9 connector routing, I didn't consider that RJ9 cables are typically crimped mirrored, so a custom cable has to be made in order to use the design.
+
 Basically a replica of any other split keyboard project you can find on github
 * Pro micro controller
 * Gateron low profile KS-33 switches with hot-swap sockets
