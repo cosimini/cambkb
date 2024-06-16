@@ -3,6 +3,8 @@
 **Important note: tested, it works**
 Now the hard part, try getting used to it.
 
+**WARNING:** There's a mistake in the RJ-9 connector routing, I didn't consider that RJ9 cables are typically crimped mirrored, so a custom cable has to be made in order to use the design.
+
 Basically a replica of any other split keyboard project you can find on github
 * Pro micro controller
 * Gateron low profile KS-33 switches with hot-swap sockets
@@ -22,4 +24,8 @@ The code is based on the Arduino library because I'm lazy. For the same reason I
 
 For the used switches and controller lib/footprint, credit to [foostan/kdb](https://github.com/foostan/kbd/tree/main).
 
-![Screenshot of the kicad 3D render](docs/screenshot.png "Screenshot of the kicad 3D viewer")
+# Pictures of the result
+![2024-06-16-17-23-48-641_1](https://github.com/cosimini/cambkb/assets/62906444/ec2ab020-c1a1-40b0-9ac5-2ad97fab3e9b)
+![2024-06-16-17-22-16-511_1](https://github.com/cosimini/cambkb/assets/62906444/fa82e1bc-4dc1-4705-ae86-45e039a12837)
+![2024-06-16-17-20-41-814_1](https://github.com/cosimini/cambkb/assets/62906444/ce6cdbbb-3ab2-4c71-b18e-c91bc6841e46)
+![2024-06-16-17-21-01-321_1](https://github.com/cosimini/cambkb/assets/62906444/29d4baf3-8957-483d-917b-7c76c966f15b)
