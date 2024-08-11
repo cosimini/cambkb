@@ -31,7 +31,7 @@ char cRIGHT = KEY_RIGHT_ARROW;
 char cHOME = KEY_HOME;
 char cEND = KEY_END;
 char cPAGEDOWN = KEY_PAGE_DOWN;
-char cPAGEUP = KEY_UP_ARROW;
+char cPAGEUP = KEY_PAGE_UP;
 char cF1 = KEY_F1;
 char cF2 = KEY_F2;
 char cF3 = KEY_F3;
@@ -50,14 +50,14 @@ const int nModifiers = 1;
 int modifiers[2][nModifiers] = {{2}, {0}};  // Address of the modifiers
 char keyMap[N_LAYERS][N_ROWS][N_COLS] = {	// Keymap for each possible layer
 	{	// Layer 0
-		{'=',  cBS,    '0', '9', '8', '7', '6'},
-		{cESC,  '/',    'p', 'o', 'i', 'u', 'y'},
-		{0,    cENTER, ';', 'l', 'k', 'j', 'h'},
-		{'\\', '\'',   '-', '.', ',', 'm', 'n'}
+		{'=',    cBS,    '0', '9', '8', '7', '6'},
+		{cCTRL,  '/',    'p', 'o', 'i', 'u', 'y'},
+		{0,      cENTER, ';', 'l', 'k', 'j', 'h'},
+		{cSHIFT, '\'',   '-', '.', ',', 'm', 'n'}
 	},
 	{	// Layer 1
 		{cF11, cDEL,   cF10, cF9,    cF8,     cF7,       cF6},
-		{0,    '/',    ']',  '[',    '}',     '{',       '#'},
+		{cBS,  '\\',   '\'', '-',    ']',     '[',       '~'},
 		{0,    cENTER, '\\', cRIGHT, cUP,     cDOWN,     cLEFT},
 		{0,    '\'',   '-',  cEND,   cPAGEUP, cPAGEDOWN, cHOME}
 	}
@@ -75,9 +75,9 @@ char keyMap[N_LAYERS][N_ROWS][N_COLS] = {	// Keymap for each possible layer
 	},
 	{	// Layer 1
 		{cF12, cESC,   cF1, cF2, cF3, cF4, cF5},
-		{0,    cTAB,   0,   '7', '8', '9', 'e'},
-		{cALT, cSHIFT, 0,   '4', '5', '6', '.'},
-		{cWIN, cCTRL,  0,   '1', '2', '3', '0'}
+		{' ',    cTAB,   '*',   '7', '8', '9', '+'},
+		{cALT, cSHIFT, '-',   '4', '5', '6', '.'},
+		{cWIN, cCTRL,  '/',   '1', '2', '3', '0'}
 	},
 };
 
