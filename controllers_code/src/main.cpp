@@ -4,7 +4,7 @@
 * As all the code I write it ended up being a pile of crap.
 */
 
-#define SIDE 0        // Select the keymap to save in the device memory
+#define SIDE 1        // Select the keymap to save in the device memory
 #define MOD_CHAR 'm'  // Char sent by both parties before sending the modifier sum value
 
 #include "Arduino.h"

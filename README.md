@@ -24,6 +24,16 @@ The code is based on the Arduino library because I'm lazy. For the same reason I
 
 For the used switches and controller lib/footprint, credit to [foostan/kdb](https://github.com/foostan/kbd/tree/main).
 
+# BOM
+* Controllers: Any pro-micro close is fine, I used the cheapest one I found on Amazon. You can buy presoldered ones, the PCB is compatible with any orientation.
+* Switches: Gatheron low profile switches, KS-33 footprint, I used [those ones](https://www.gateron.com/products/gateron-ks-33-low-profile-20-banana-switch?VariantsId=10734).
+* Sockets for the switches: The ones associated to the KS-33 footprint ([those](https://www.gateron.com/products/gateron-low-profile-switch-hot-swap-pcb-socket?VariantsId=10234)).
+* Diodes: BAT85 are the ones I used, but any signal diode with similar specs should be fine.
+* Resistors: There's a resistor in series to the voltage sourcing pin. To prevent accidental shorts, a 1k resistor is placed in series. Those can be replaced by a jumper wire. Note I used DIN0204, a kind of small size trough hole package.
+* Sockets for the controller: If you don't want to solder the controllers to the PCB, you can use any 2.54mm socket.
+* RJ9 socket: It is a standard, any trough hole socket is fine.
+* RJ9 Cable: **WARNING** as mentioned above, you need to make your own cable, as the common telephone ones has mirrored connected plugs at each end (i.e. in my design each cable must end on the same size of the plug).
+
 # Pictures of the result
 ![2024-06-16-17-23-48-641_1](https://github.com/cosimini/cambkb/assets/62906444/ec2ab020-c1a1-40b0-9ac5-2ad97fab3e9b)
 ![2024-06-16-17-22-16-511_1](https://github.com/cosimini/cambkb/assets/62906444/fa82e1bc-4dc1-4705-ae86-45e039a12837)

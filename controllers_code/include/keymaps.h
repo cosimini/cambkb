@@ -56,10 +56,10 @@ char keyMap[N_LAYERS][N_ROWS][N_COLS] = {	// Keymap for each possible layer
 		{cSHIFT, '\'',   '-', '.', ',', 'm', 'n'}
 	},
 	{	// Layer 1
-		{cF11, cDEL,   cF10, cF9,    cF8,     cF7,       cF6},
-		{cBS,  '\\',   '\'', '-',    ']',     '[',       '~'},
-		{0,    cENTER, '\\', cRIGHT, cUP,     cDOWN,     cLEFT},
-		{0,    '\'',   '-',  cEND,   cPAGEUP, cPAGEDOWN, cHOME}
+		{cF11,   cDEL,   cF10, cF9,    cF8,     cF7,       cF6},
+		{cCTRL,  '\\',   '\'', '-',    ']',     '[',       '~'},
+		{0,      cENTER, '\\', cRIGHT, cUP,     cDOWN,     cLEFT},
+		{cSHIFT, '\'',   '-',  cEND,   cPAGEUP, cPAGEDOWN, cHOME}
 	}
 };
 
