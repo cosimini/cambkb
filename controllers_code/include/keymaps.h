@@ -57,7 +57,7 @@ char keyMap[N_LAYERS][N_ROWS][N_COLS] = {	// Keymap for each possible layer
 	},
 	{	// Layer 1
 		{cF11,   cDEL,   cF10, cF9,    cF8,     cF7,       cF6},
-		{cCTRL,  '\\',   '\'', '-',    ']',     '[',       '~'},
+		{cCTRL,  '\\',   '\'', '-',    ']',     '[',       '`'},
 		{0,      cENTER, '\\', cRIGHT, cUP,     cDOWN,     cLEFT},
 		{cSHIFT, '\'',   '-',  cEND,   cPAGEUP, cPAGEDOWN, cHOME}
 	}
